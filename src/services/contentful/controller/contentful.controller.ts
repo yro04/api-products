@@ -4,14 +4,16 @@ import {
   HttpCode,
   HttpStatus,
   InternalServerErrorException,
+  Logger,
 } from '@nestjs/common';
-import { ContentfulService } from './contentful.service';
-import { Product } from '../../domain/products/repository/product.entity';
+import { ContentfulService } from '../service/contentful.service';
+import { Product } from '../../../domain/products/repository/product.entity';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
 @ApiTags('Contentful')
 @Controller('contentful')
 export class ContentfulController {
+  private readonly _logger = new Logger(ContentfulController.name);
   constructor(private readonly _contentfulService: ContentfulService) {}
 
   @Get('products')
@@ -30,6 +32,7 @@ export class ContentfulController {
     try {
       return await this._contentfulService.fetchProducts();
     } catch (error) {
+      this._logger.error('Failed to fetch products from Contentful', error.stack);
       throw new InternalServerErrorException(
         'Failed to fetch products from Contentful',
       );

@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
-import { ContentfulController } from './contentful.controller';
-import { ContentfulService } from './contentful.service';
+import { ContentfulController } from './controller/contentful.controller';
+import { ContentfulService } from './service/contentful.service';
 
 @Module({
   imports: [],

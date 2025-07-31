@@ -1,8 +1,8 @@
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { createClient } from 'contentful';
-import { Product } from '../../domain/products/repository/product.entity';
-import { NA } from '../../shared/constant';
+import { Product } from '../../../domain/products/repository/product.entity';
+import { NA } from '../../../shared/constant';
 
 
 @Injectable()
