@@ -3,6 +3,9 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { ProductsModule } from './domain/products/products.module';
+import { ContentfulModule } from './services/contentful/contentful.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -20,7 +23,10 @@ import { AppService } from './app.service';
         synchronize: true, // switch to false in production!
       }),
       inject: [ConfigService],
-    }),    
+    }),
+    ScheduleModule.forRoot(),
+    ProductsModule,
+    ContentfulModule
   ],
   controllers: [AppController],
   providers: [AppService],
