@@ -35,9 +35,3 @@ jobs:
 
       - name: Run Tests
         run: npm run test -- --coverage
-
-      - name: Upload coverage to GitHub summary
-        if: success()
-        run: |
-          echo '### Test Coverage Summary' >> $GITHUB_STEP_SUMMARY
-          cat coverage/lcov-report/index.html | grep -A 1 "Summary" >> $GITHUB_STEP_SUMMARY
