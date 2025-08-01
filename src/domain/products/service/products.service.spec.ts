@@ -4,6 +4,7 @@ import { ContentfulService } from '../../../shared/services/contentful/service/c
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Test, TestingModule } from '@nestjs/testing';
 import { Repository } from 'typeorm';
+import { SyncProductsResponse } from '../model/sync-product.model';
 
 describe('ProductsService (Happy Paths)', () => {
   let service: ProductsService;
@@ -43,10 +44,9 @@ describe('ProductsService (Happy Paths)', () => {
     contentfulService = module.get(ContentfulService);
   });
 
-    it('should be defined', () => {
+  it('should be defined', () => {
     expect(service).toBeDefined();
   });
-
 
   it('should sync and insert new products', async () => {
     const mockProducts = [
@@ -64,15 +64,17 @@ describe('ProductsService (Happy Paths)', () => {
       },
     ];
 
+    const mockResponse: SyncProductsResponse = {
+      inserted: 1,
+      total: 1,
+      message: 'Products synced successfully',
+      success: true,
+    };
+
     contentfulService.fetchProducts.mockResolvedValueOnce(mockProducts);
     productRepo.find.mockResolvedValueOnce([]); // No existing products
 
-    await expect(service.syncProducts()).resolves.toEqual({
-      inserted: 1,
-      total: 1,
-      message: expect.any(String),
-      success: true,
-    });
+    await expect(service.syncProducts()).resolves.toEqual(mockResponse);
 
     expect(productRepo.save).toHaveBeenCalledWith([
       expect.objectContaining({ contentfulId: 'abc123' }),

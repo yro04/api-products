@@ -1,14 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
-
-import { Repository } from 'typeorm';
 import { ProductRepository } from '../../products/repository/product.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { ReportsService } from './report.service';
 
-
 describe('ReportsService', () => {
   let service: ReportsService;
-  let repo: Repository<ProductRepository>;
 
   const mockRepository = {
     count: jest.fn(),
@@ -36,7 +32,6 @@ describe('ReportsService', () => {
     }).compile();
 
     service = module.get<ReportsService>(ReportsService);
-    repo = module.get<Repository<ProductRepository>>(getRepositoryToken(ProductRepository));
 
     jest.clearAllMocks();
   });

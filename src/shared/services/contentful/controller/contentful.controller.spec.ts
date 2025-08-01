@@ -1,11 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ContentfulController } from './contentful.controller';
 import { ContentfulService } from '../service/contentful.service';
-import { InternalServerErrorException, Logger } from '@nestjs/common';
+import { InternalServerErrorException } from '@nestjs/common';
 
 describe('ContentfulController', () => {
   let controller: ContentfulController;
-  let contentfulService: ContentfulService;
 
   const mockContentfulService = {
     fetchProducts: jest.fn(),
@@ -23,7 +22,6 @@ describe('ContentfulController', () => {
     }).compile();
 
     controller = module.get<ContentfulController>(ContentfulController);
-    contentfulService = module.get<ContentfulService>(ContentfulService);
   });
 
   afterEach(() => {

@@ -5,7 +5,6 @@ import { HttpException, HttpStatus } from '@nestjs/common';
 
 describe('ContentfulService', () => {
   let service: ContentfulService;
-  let configService: ConfigService;
 
   // Mock createClient and its getEntries method
   const mockGetEntries = jest.fn();
@@ -24,8 +23,8 @@ describe('ContentfulService', () => {
         {
           provide: ConfigService,
           useValue: {
-            get: jest.fn((key: string) => {
-              const values = {
+            get: jest.fn((key: string): string | undefined => {
+              const values: Record<string, string> = {
                 CONTENTFUL_SPACE_ID: 'spaceId',
                 CONTENTFUL_ACCESS_TOKEN: 'accessToken',
                 CONTENTFUL_ENVIRONMENT: 'master',
@@ -39,13 +38,11 @@ describe('ContentfulService', () => {
     }).compile();
 
     service = module.get<ContentfulService>(ContentfulService);
-    configService = module.get<ConfigService>(ConfigService);
   });
 
   afterEach(() => {
     jest.clearAllMocks();
   });
-
 
   it('should throw HttpException on fetch error', async () => {
     mockGetEntries.mockRejectedValue(new Error('Fetch error'));

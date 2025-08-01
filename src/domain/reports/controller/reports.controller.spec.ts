@@ -15,9 +15,7 @@ describe('ReportsController', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [ReportsController],
-      providers: [
-        { provide: ReportsService, useValue: mockReportsService },
-      ],
+      providers: [{ provide: ReportsService, useValue: mockReportsService }],
     }).compile();
 
     controller = module.get<ReportsController>(ReportsController);
@@ -27,7 +25,9 @@ describe('ReportsController', () => {
   });
 
   it('getDeletedPercentage should return percentage from service', async () => {
-    mockReportsService.getDeletedPercentage.mockResolvedValue({ percentage: 42 });
+    mockReportsService.getDeletedPercentage.mockResolvedValue({
+      percentage: 42,
+    });
 
     const result = await controller.getDeletedPercentage();
 
@@ -36,9 +36,15 @@ describe('ReportsController', () => {
   });
 
   it('getNonDeletedPercentage should call service with correct query params and return percentage', async () => {
-    mockReportsService.getNonDeletedPercentage.mockResolvedValue({ percentage: 75 });
+    mockReportsService.getNonDeletedPercentage.mockResolvedValue({
+      percentage: 75,
+    });
 
-    const result = await controller.getNonDeletedPercentage(true, '2023-01-01', '2023-01-31');
+    const result = await controller.getNonDeletedPercentage(
+      true,
+      '2023-01-01',
+      '2023-01-31',
+    );
 
     expect(service.getNonDeletedPercentage).toHaveBeenCalledWith({
       withPrice: true,
@@ -49,7 +55,10 @@ describe('ReportsController', () => {
   });
 
   it('getRecentProducts should return recent products from service', async () => {
-    const mockProducts = [{ id: 1, name: 'Prod 1' }, { id: 2, name: 'Prod 2' }];
+    const mockProducts = [
+      { id: 1, name: 'Prod 1' },
+      { id: 2, name: 'Prod 2' },
+    ];
     mockReportsService.getRecentProducts.mockResolvedValue(mockProducts);
 
     const result = await controller.getRecentProducts();

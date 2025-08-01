@@ -1,11 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthController } from './auth.controller';
 import { AuthService } from '../service/auth.service';
-import {
-  UnauthorizedException,
-  BadRequestException,
-  InternalServerErrorException,
-} from '@nestjs/common';
+import { InternalServerErrorException } from '@nestjs/common';
 
 describe('AuthController', () => {
   let controller: AuthController;
@@ -45,7 +41,10 @@ describe('AuthController', () => {
 
     const result = controller.login(dto);
 
-    expect(authService.validateUser).toHaveBeenCalledWith('testuser', 'testpass');
+    expect(authService.validateUser).toHaveBeenCalledWith(
+      'testuser',
+      'testpass',
+    );
     expect(authService.login).toHaveBeenCalledWith(mockUser);
     expect(result).toEqual(mockToken);
   });
