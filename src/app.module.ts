@@ -3,8 +3,12 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+
+import { SharedModule } from './shared/shared.module';
+import { ReportsModule } from './domain/reports/reports.module';
+
 import { ProductsModule } from './domain/products/products.module';
-import { ContentfulModule } from './services/contentful/contentful.module';
+
 import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
@@ -12,13 +16,13 @@ import { ScheduleModule } from '@nestjs/schedule';
     ConfigModule.forRoot({ isGlobal: true }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: (config: ConfigService) => ({
+      useFactory: (_configService: ConfigService) => ({
         type: 'postgres',
-        host: config.get('DATABASE_HOST'),
-        port: config.get<number>('DATABASE_PORT'),
-        username: config.get('DATABASE_USER'),
-        password: config.get('DATABASE_PASSWORD'),
-        database: config.get('DATABASE_NAME'),
+        host: _configService.get('DATABASE_HOST'),
+        port: _configService.get<number>('DATABASE_PORT'),
+        username: _configService.get('DATABASE_USER'),
+        password: _configService.get('DATABASE_PASSWORD'),
+        database: _configService.get('DATABASE_NAME'),
         autoLoadEntities: true,
         synchronize: true, // switch to false in production!
       }),
@@ -26,10 +30,10 @@ import { ScheduleModule } from '@nestjs/schedule';
     }),
     ScheduleModule.forRoot(),
     ProductsModule,
-    ContentfulModule
+    ReportsModule,
+    SharedModule,
   ],
   controllers: [AppController],
   providers: [AppService],
-
 })
 export class AppModule {}

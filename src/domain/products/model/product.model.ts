@@ -9,3 +9,11 @@ export interface Product {
   currency: string;
   stock: number;
 }
+
+export interface GetProductsParams {
+  page?: number;
+  name?: string;
+  category?: string;
+  minPrice?: number;
+  maxPrice?: number;
+}

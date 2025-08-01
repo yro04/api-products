@@ -6,5 +6,6 @@ import { ContentfulService } from './service/contentful.service';
   imports: [],
   controllers: [ContentfulController],
   providers: [ContentfulService],
+  exports: [ContentfulService],
 })
 export class ContentfulModule {}

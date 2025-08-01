@@ -1,36 +1,33 @@
 import {
+  BadRequestException,
   HttpException,
   HttpStatus,
   Injectable,
+  InternalServerErrorException,
   Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
-import { Product } from '../repository/product.entity';
-import { ContentfulService } from '../../../services/contentful/service/contentful.service';
+
 import { PaginatedProducts } from '../model/paginated.products';
 
 import { Cron } from '@nestjs/schedule';
 import { SyncProductsResponse } from '../model/sync-product.model';
-import { syncedMessage } from 'src/shared/constant';
+import { syncedMessage } from '../../../shared/constant';
+import { ContentfulService } from '../../../shared/services/contentful/service/contentful.service';
+
+import { ProductRepository } from '../repository/product.entity';
+import { GetProductsParams } from '../model/product.model';
 
 @Injectable()
 export class ProductsService {
-  private readonly _logger = new Logger(ContentfulService.name);
+  private readonly _logger = new Logger(ProductsService.name);
   constructor(
-    @InjectRepository(Product)
-    private readonly _productsRepository: Repository<Product>,
+    @InjectRepository(ProductRepository)
+    private readonly _productsRepository: Repository<ProductRepository>,
     private readonly _contentFulService: ContentfulService,
   ) {}
-
-  findAll(): Promise<Product[]> {
-    return this._productsRepository.find();
-  }
-
-  findOne(id: string): Promise<Product | null> {
-    return this._productsRepository.findOneBy({ id });
-  }
 
   async getProducts({
     page = 1,
@@ -38,37 +35,86 @@ export class ProductsService {
     category,
     minPrice,
     maxPrice,
-  }): Promise<PaginatedProducts> {
+  }: GetProductsParams): Promise<PaginatedProducts> {
     const take = 5;
     const skip = (page - 1) * take;
-    const where: any = { deleted: false };
 
-    if (name) where.name = name;
-    if (category) where.category = category;
-    if (minPrice || maxPrice) {
-      where.price = {};
-      if (minPrice) where.price['$gte'] = minPrice;
-      if (maxPrice) where.price['$lte'] = maxPrice;
+    try {
+      const query = this._productsRepository
+        .createQueryBuilder('product')
+        .where('product.deleted = :deleted', { deleted: false });
+
+      if (page < 1) {
+        throw new BadRequestException('Page must be 1 or greater');
+      }
+
+      if (name) {
+        query.andWhere('product.name ILIKE :name', { name: `%${name}%` });
+      }
+
+      if (category) {
+        query.andWhere('product.category = :category', { category });
+      }
+
+      if (
+        minPrice !== undefined &&
+        maxPrice !== undefined &&
+        minPrice > maxPrice
+      ) {
+        throw new BadRequestException(
+          'minPrice cannot be greater than maxPrice',
+        );
+      }
+
+      if (minPrice !== undefined && maxPrice !== undefined) {
+        query.andWhere('product.price BETWEEN :min AND :max', {
+          min: minPrice,
+          max: maxPrice,
+        });
+      } else if (minPrice !== undefined) {
+        query.andWhere('product.price >= :min', { min: minPrice });
+      } else if (maxPrice !== undefined) {
+        query.andWhere('product.price <= :max', { max: maxPrice });
+      }
+
+      const [items, total] = await query
+        .skip(skip)
+        .take(take)
+        .getManyAndCount();
+
+      return {
+        items,
+        total,
+        page,
+        pageSize: take,
+      };
+    } catch (error) {
+      this._logger.error('Error in getProducts:', error);
+      throw new InternalServerErrorException('Failed to retrieve products');
     }
-
-    const [items, total] = await this._productsRepository.findAndCount({
-      where,
-      take,
-      skip,
-    });
-    return { items, total, page, pageSize: take };
   }
 
   async deleteProduct(id: string): Promise<void> {
     try {
       const product = await this._productsRepository.findOne({
-        where: { id, deleted: false },
+        where: { id: id, deleted: false },
       });
       if (!product) throw new NotFoundException('Product not found');
+
       product.deleted = true;
       await this._productsRepository.save(product);
+
+      this._logger.log(`Product ${id} marked as deleted successfully`);
     } catch (error) {
-      throw new Error(error);
+      this._logger.error(`Error while deleting product ${id}:`, error);
+
+      if (error instanceof HttpException) {
+        throw error;
+      }
+
+      throw new InternalServerErrorException(
+        'An unexpected error occurred while deleting the product',
+      );
     }
   }
 
@@ -83,7 +129,7 @@ export class ProductsService {
       });
 
       const existingMap = new Map(
-        existingProducts.map((product: Product) => [
+        existingProducts.map((product: ProductRepository) => [
           product.contentfulId,
           product,
         ]),
@@ -117,7 +163,7 @@ export class ProductsService {
         success: true,
       };
     } catch (error) {
-      this._logger.error('syncProducts failed', error.stack);
+      this._logger.error('syncProducts failed', error);
       throw new HttpException('Product sync failed', HttpStatus.BAD_GATEWAY);
     }
   }

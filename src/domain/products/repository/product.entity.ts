@@ -16,7 +16,7 @@ import {
 } from 'class-validator';
 
 @Entity()
-export class Product {
+export class ProductRepository {
   @PrimaryGeneratedColumn('uuid')
   @ApiProperty({
     description: 'Unique identifier of the product',

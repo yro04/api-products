@@ -1,7 +1,7 @@
-import { Product } from "../repository/product.entity";
+import { ProductRepository } from '../repository/product.entity';
 
 export interface PaginatedProducts {
-  items: Product[];
+  items: ProductRepository[];
   total: number;
   page: number;
   pageSize: number;
