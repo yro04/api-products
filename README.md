@@ -42,9 +42,9 @@ Copy `.env.example` to `.env` and fill in values as needed (see [Environment Var
 
 2. **Setting up environment**
    ```sh
-  npm install
+   npm install
    ```
-   dd
+   
    ```sh
    docker-compose up --build
    ```
