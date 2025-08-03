@@ -40,7 +40,11 @@ Copy `.env.example` to `.env` and fill in values as needed (see [Environment Var
    cd <repo-folder>
    ```
 
-2. **Start using Docker Compose**
+2. **Setting up environment**
+   ```sh
+  npm install
+   ```
+   dd
    ```sh
    docker-compose up --build
    ```
